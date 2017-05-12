@@ -1,0 +1,14 @@
+Server, Status
+{% for server in left|sort %}
+{% if skipped[server] == 0 or left[server] == 0 %} {{ server }}, skipped
+{% else %}
+{% if left[server] == 1 %}{{ server }}, nochange
+{% endif %}
+{% if left[server] == 2 %}{{ server }}, success
+{% endif %}
+{% if left[server] == 3 %}{{ server }}, failed
+{% endif %}
+{% if left[server] == 4 %}{{ server }}, unreachable
+{% endif %}
+{% endif %}
+{% endfor %}

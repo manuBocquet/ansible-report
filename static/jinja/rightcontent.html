@@ -1,0 +1,12 @@
+<h2>{{ server[0] }}</h2>
+{% for cid in data %}
+	<div class="bs-callout {{ data[cid]['status'] }}">
+  	<h3> {{ id[cid] }} </h3><h4>{{ data[cid]['epoch']| datetime }} / id: {{ cid }} / {{ data[cid]['module_name'] }}
+		
+		{% if data[cid]['start'] %} 
+		, Start: {{ data[cid]['start'] }}, delta: {{ data[cid]['delta'] }} 
+		{% endif %}
+		</h4> 
+    <pre> {{ data[cid]['msg'] }} </pre>
+	</div>
+{% endfor %}

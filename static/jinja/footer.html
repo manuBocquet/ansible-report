@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-4"><h3>Server : {{ status['nb_servers'] }}</h3>&nbsp;&nbsp;( unreachable: {{ status['unreachable'] }} )</div>
+    <div class="col-sm-4"><h3>Tasks total : {{ status['total'] }}</h3></div>
+    <div class="col-sm-4">
+			<h4>Success: {{ status['ok'] }} ; Failed: {{ status['failures'] }} ; Unreachable: {{ status['unreachable'] }} ; Skipped: {{ status['skipped'] }}</h4>
+			<div class="progress" style="width: 100%"> 
+  			<div class="progress-bar progress-bar-success" style="width: {{ 100 * status['ok'] / status['total'] }}%">
+    			<span class="sr-only">Success</span>
+					<div class="text-left">{{ status['ok'] }}</div>
+  			</div>
+  			<div class="progress-bar progress-bar-danger" style="width: {{ 100 * (status['failures'] + status['unreachable']) / status['total'] }}%">
+    			<span class="sr-only">Failures</span>
+					<div class="text-left">{{ (status['failures'] + status['unreachable']) }}</div>
+  			</div>
+			</div>		
+		</div>
+  </div>
+</div>
+

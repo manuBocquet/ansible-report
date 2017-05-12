@@ -1,0 +1,33 @@
+{% for server in left|sort %}
+	{% if skipped[server] == 0 or left[server] == 0 %}
+		{% if filter == "0" %}
+  		<button type="button" class="myb btn btn-default" onclick="rightcontent('{{ server }}');">{{ server }}</button></br>
+	  {% endif %}
+	{% else %}
+
+	{% if left[server] == 1 %}	
+		{% if filter == "2" or filter == "0" or filter == "1" %}
+  		<button type="button" class="myb btn btn-info" onclick="rightcontent('{{ server }}');">{{ server }}</button></br>
+	  {% endif %}
+	{% endif %}
+
+	{% if left[server] == 2 %}	
+		{% if filter != "3" and filter != "4"  %}
+  		<button type="button" class="myb btn btn-success" onclick="rightcontent('{{ server }}');">{{ server }}</button></br>
+	  {% endif %}
+	{% endif %}
+	
+	{% if left[server] == 3 %}	
+		{% if filter == "3" or filter == "0" or filter == "2" %}
+  		<button type="button" class="myb btn btn-danger" onclick="rightcontent('{{ server }}');">{{ server }}</button></br>
+	  {% endif %}
+	{% endif %}
+	
+	{% if left[server] == 4 %}	
+		{% if filter == "4" or filter == "0" or filter == "2" %}
+  		<button type="button" class="myb btn btn-danger" onclick="rightcontent('{{ server }}');">{{ server }}</button></br>
+	  {% endif %}
+	{% endif %}
+	
+	{% endif %}
+{% endfor %}

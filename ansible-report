@@ -1,0 +1,138 @@
+#!/usr/bin/python
+###############################################################################
+# Author   : Emmaunel Bocquet
+# Version  : 1.1
+# Updates : 
+#    2016/11/10 : Inital release
+#
+###############################################################################
+# Usage : 
+# Set yout personnal random port (> 2014) to assign the HTTP port used.
+# if not set a ramdom port is choosed.
+# export ansible_report_port="2380"
+# > ansible_report <json report from ansible run>
+#
+###############################################################################
+
+import sys
+import re
+import os
+from os import curdir, sep, path, environ
+import pprint
+import urlparse
+import socket
+from posixpath import basename, dirname
+from libs import *
+from cgi import parse_header, parse_multipart
+from urlparse import parse_qs
+from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+import json
+
+###############################################################################
+
+exit        = 1
+
+try:
+  json_data   = load_json.load_file(sys.argv[1])
+except IndexError:
+  json_data   = load_json.load_file(os.getenv('ANSIBLE_REPORT_FILE',"report.json"))
+
+basepath    = os.path.dirname(os.path.realpath(__file__))
+print 
+
+try:
+	PORT_NUMBER = int(environ['ANSIBLE_REPORT_PORT'])
+except:
+	PORT_NUMBER = 0
+
+###############################################################################
+#This class will handles any incoming request from
+
+class myHandler(BaseHTTPRequestHandler):
+
+	def do_POST(self):
+		global exit
+		ctype, pdict = parse_header(self.headers.getheader('content-type'))
+                if ctype == 'multipart/form-data':
+			postvars = parse_multipart(self.rfile, pdict)
+		elif ctype == 'application/x-www-form-urlencoded':
+			length = int(self.headers.getheader('content-length'))
+			postvars = parse_qs(self.rfile.read(length), keep_blank_values=1)
+		else:
+			postvars = {}	
+		postvars['json'] = json_data
+                func = basename(self.path)
+		html = call(func,postvars)
+                self.send_response(200)
+                self.end_headers()
+
+		if re.search('Quit',html):
+			print ""
+			exit = 0
+		else:
+			self.wfile.write(html)
+
+	def do_GET(self):
+		global exit
+		
+		if self.path=="/":
+			self.path="/index.html"
+		
+		sendReply = False
+		if self.path.endswith(".html"):
+			mimetype='text/html'
+			sendReply = True
+		if self.path.endswith(".jpg"):
+			mimetype='image/jpg'
+			sendReply = True
+		if self.path.endswith(".png"):
+			mimetype='image/png'
+			sendReply = True
+		if self.path.endswith(".gif"):
+			mimetype='image/gif'
+			sendReply = True
+		if self.path.endswith(".js"):
+			mimetype='application/javascript'
+			sendReply = True
+		if self.path.endswith(".css"):
+			mimetype='text/css'
+			sendReply = True
+
+		if sendReply == True:
+			#Open the static file requested and send it
+			try:
+				f = open(basepath + "/static/" + self.path) 
+				self.send_response(200)
+				self.send_header('Content-type',mimetype)
+				self.end_headers()
+				self.wfile.write(f.read())
+				f.close()
+			except IOError:				
+				self.send_response(404)				
+			
+	def log_message(self, format, *args):
+			return
+
+def keep_running():
+    return exit
+
+###############################################################################
+# Main
+
+try:
+	#Create a web server and define the handler to manage the
+	#incoming request
+	server = HTTPServer(('', PORT_NUMBER), myHandler)
+	info = server.socket.getsockname()
+	#print 'Open browser and load : http://'+socket.gethostname()+':'+str(info[1])
+	print 'Open browser and load : http://'+socket.getfqdn()+':'+str(info[1])
+
+	while keep_running():
+		server.handle_request()
+			
+
+except KeyboardInterrupt:
+	print '^C received, shutting down the web server'
+	server.socket.close()
+	sys.exit(0)
+
