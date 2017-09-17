@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 ###############################################################################
 # Author   : Emmaunel Bocquet
 # Version  : 1.1
@@ -41,77 +41,77 @@ basepath    = os.path.dirname(os.path.realpath(__file__))
 print 
 
 try:
-	PORT_NUMBER = int(environ['ANSIBLE_REPORT_PORT'])
+    PORT_NUMBER = int(environ['ANSIBLE_REPORT_PORT'])
 except:
-	PORT_NUMBER = 0
+    PORT_NUMBER = 0
 
 ###############################################################################
 #This class will handles any incoming request from
 
 class myHandler(BaseHTTPRequestHandler):
 
-	def do_POST(self):
-		global exit
-		ctype, pdict = parse_header(self.headers.getheader('content-type'))
-                if ctype == 'multipart/form-data':
-			postvars = parse_multipart(self.rfile, pdict)
-		elif ctype == 'application/x-www-form-urlencoded':
-			length = int(self.headers.getheader('content-length'))
-			postvars = parse_qs(self.rfile.read(length), keep_blank_values=1)
-		else:
-			postvars = {}	
-		postvars['json'] = json_data
-                func = basename(self.path)
-		html = call(func,postvars)
+    def do_POST(self):
+        global exit
+        ctype, pdict = parse_header(self.headers.getheader('content-type'))
+        if ctype == 'multipart/form-data':
+            postvars = parse_multipart(self.rfile, pdict)
+        elif ctype == 'application/x-www-form-urlencoded':
+            length = int(self.headers.getheader('content-length'))
+            postvars = parse_qs(self.rfile.read(length), keep_blank_values=1)
+        else:
+            postvars = {}   
+        postvars['json'] = json_data
+        func = basename(self.path)
+        html = call(func,postvars)
+        self.send_response(200)
+        self.end_headers()
+
+        if re.search('Quit',html):
+            print("")
+            exit = 0
+        else:
+            self.wfile.write(html)
+
+    def do_GET(self):
+        global exit
+        
+        if self.path=="/":
+            self.path="/index.html"
+        
+        sendReply = False
+        if self.path.endswith(".html"):
+            mimetype='text/html'
+            sendReply = True
+        if self.path.endswith(".jpg"):
+            mimetype='image/jpg'
+            sendReply = True
+        if self.path.endswith(".png"):
+            mimetype='image/png'
+            sendReply = True
+        if self.path.endswith(".gif"):
+            mimetype='image/gif'
+            sendReply = True
+        if self.path.endswith(".js"):
+            mimetype='application/javascript'
+            sendReply = True
+        if self.path.endswith(".css"):
+            mimetype='text/css'
+            sendReply = True
+
+        if sendReply == True:
+            #Open the static file requested and send it
+            try:
+                f = open(basepath + "/static/" + self.path) 
                 self.send_response(200)
+                self.send_header('Content-type',mimetype)
                 self.end_headers()
-
-		if re.search('Quit',html):
-			print ""
-			exit = 0
-		else:
-			self.wfile.write(html)
-
-	def do_GET(self):
-		global exit
-		
-		if self.path=="/":
-			self.path="/index.html"
-		
-		sendReply = False
-		if self.path.endswith(".html"):
-			mimetype='text/html'
-			sendReply = True
-		if self.path.endswith(".jpg"):
-			mimetype='image/jpg'
-			sendReply = True
-		if self.path.endswith(".png"):
-			mimetype='image/png'
-			sendReply = True
-		if self.path.endswith(".gif"):
-			mimetype='image/gif'
-			sendReply = True
-		if self.path.endswith(".js"):
-			mimetype='application/javascript'
-			sendReply = True
-		if self.path.endswith(".css"):
-			mimetype='text/css'
-			sendReply = True
-
-		if sendReply == True:
-			#Open the static file requested and send it
-			try:
-				f = open(basepath + "/static/" + self.path) 
-				self.send_response(200)
-				self.send_header('Content-type',mimetype)
-				self.end_headers()
-				self.wfile.write(f.read())
-				f.close()
-			except IOError:				
-				self.send_response(404)				
-			
-	def log_message(self, format, *args):
-			return
+                self.wfile.write(f.read())
+                f.close()
+            except IOError:             
+                self.send_response(404)             
+            
+    def log_message(self, format, *args):
+            return
 
 def keep_running():
     return exit
@@ -120,19 +120,19 @@ def keep_running():
 # Main
 
 try:
-	#Create a web server and define the handler to manage the
-	#incoming request
-	server = HTTPServer(('', PORT_NUMBER), myHandler)
-	info = server.socket.getsockname()
-	#print 'Open browser and load : http://'+socket.gethostname()+':'+str(info[1])
-	print 'Open browser and load : http://'+socket.getfqdn()+':'+str(info[1])
+    #Create a web server and define the handler to manage the
+    #incoming request
+    server = HTTPServer(('', PORT_NUMBER), myHandler)
+    info = server.socket.getsockname()
+    #print 'Open browser and load : http://'+socket.gethostname()+':'+str(info[1])
+    print ('Open browser and load : http://{}:{}'.format(socket.getfqdn(),str(info[1])))
 
-	while keep_running():
-		server.handle_request()
-			
+    while keep_running():
+        server.handle_request()
+            
 
 except KeyboardInterrupt:
-	print '^C received, shutting down the web server'
-	server.socket.close()
-	sys.exit(0)
+    print ('^C received, shutting down the web server')
+    server.socket.close()
+    sys.exit(0)
 

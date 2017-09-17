@@ -25,7 +25,7 @@ def format_datetime(value, format='medium'):
     if format == 'full':
         format="EEEE, d. MMMM y 'at' HH:mm"
     elif format == 'medium':
-        format="y/MM/dd HH:mm:ss"
+        format="y/MM/dd HH:mm:ss.SSSS"
     return babel.dates.format_datetime(value, format)
 
 TEMPLATE_ENVIRONMENT.filters['datetime'] = format_datetime
