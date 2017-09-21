@@ -35,7 +35,7 @@ or
 
 $ ansible-report <file.json>
 
-( Note : Python 2.7 need to be installed on your system )
+( Note : Python 2.7 and modules jinja2,babel need to be installed on your system )
 
 ```
 
