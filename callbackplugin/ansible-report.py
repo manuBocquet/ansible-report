@@ -106,11 +106,11 @@ class CallbackModule(CallbackModule_default):  # pylint: disable=too-few-public-
        	self.module_filter(result)
         return CallbackModule_default.v2_runner_on_ok(self,result)
 
-    def v2_runner_on_failed(self, result):
+    def v2_runner_on_failed(self, result, ignore_errors=False):
         host = result._host
         self.results[-1]['tasks'][-1]['hosts'][host.name] = result._result
         self.results[-1]['tasks'][-1]['hosts'][host.name]['epoch'] = time.time()
-        return CallbackModule_default.v2_runner_on_failed(self,result)
+        return CallbackModule_default.v2_runner_on_failed(self,result,ignore_errors)
 
     def v2_runner_on_unreachable(self, result):
         host = result._host
